@@ -1,0 +1,241 @@
+@身長表示機能
+--track0:線形,0,1,0
+--track1:指数,-10000,10000,0
+--track2:べき,-20,20,0
+--track3:種別,0,9,1
+--dialog:フォント名,font="Unispace";文字色/col,col1=0xffffff;影・縁色/col,col2=0x000000;装飾タイプ,deco=0;
+init_height = 1.48
+weight = 42.0
+
+height = init_height
+if(obj.track0 < 0) then
+	--height = height*((1+0.9*obj.track0))
+elseif(obj.track0 > 0) then
+	height = height*((1+9*obj.track0))
+end
+height = height * ( 10^(obj.track1/100) )
+
+mode = math.floor(obj.track3)
+digit = math.floor(math.log10(height)+1+obj.track2)
+ddigit = math.floor(math.log10(height)+1+obj.track2+8)
+yd = height*1.09361
+ydigit = math.floor(math.log10(yd)+1+obj.track2)
+yddigit = math.floor(math.log10(yd)+1+obj.track2+8)
+
+if(obj.track0 < 0) then
+	--weight = height((1+0.9*obj.track0)^3)
+elseif(obj.track0 > 0) then
+	weight = weight*((1+9*obj.track0)^3)
+end
+weight = weight * ( 10^((obj.track1*3/100)) )
+wdigit = math.floor(math.log10(weight)+1+obj.track2)
+
+if( mode == 0 ) then
+	-- デバッグ
+	str = string.format("height=%f\ntrack0=%f\n1=%f\n2=%f\ndigit=%d\n",height,obj.track0,obj.track1,obj.track2,digit)
+	--str = string.format("obj.time=%f",obj.time)
+elseif( mode == 1 ) then
+	-- メトリック
+	if( ddigit < 1 ) then
+		str = string.format("%19.3fnm",height*1000000000*10^obj.track2)
+	elseif( ddigit < 4 ) then
+		str = string.format("%18.3f  m",height*1000000*10^obj.track2)
+	elseif( ddigit < 7 ) then
+		str = string.format("%19.3fmm",height*1000*10^obj.track2)
+	elseif( digit < 1 ) then
+		str = string.format("%19.2fcm",height*100*10^obj.track2)
+	elseif( digit < 2 ) then
+		str = string.format("%19.1fcm",height*100*10^obj.track2)
+	elseif( digit < 6 ) then
+		str = string.format("%20.1fm",height*10^obj.track2)
+	elseif( digit < 20 ) then
+		str = string.format("%19.1fkm",height/1000*10^obj.track2)
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2)
+		col1=0xff7f00
+	end
+	
+elseif( mode == 2 ) then
+	-- インペリアル
+	if( ydigit < 4 ) then
+		-- 1000ydで3000ft
+		str = string.format("%15dft%2din",(yd*10^obj.track2)*3,((yd*10^obj.track2)*3*12)%12)
+	elseif( ydigit < 7 ) then
+		str = string.format("%19.1fyd",(yd*10^obj.track2))
+	elseif( ydigit < 20 ) then
+		str = string.format("%19.1fmi",((yd/1760)*10^obj.track2))
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2)
+		col1=0xff7f00
+	end
+elseif( mode == 3 ) then
+	-- 体重
+	if( wdigit < 5 ) then
+		str = string.format("%19.2fkg",weight)
+	elseif( wdigit < 19 ) then
+		str = string.format("%18.1fton",weight/1000)
+	else
+		str = string.format("  999999999999999+ton")
+		col1=0xff0000
+	end
+elseif( mode == 4 ) then
+	-- フレーム数
+	str = string.format("%-5d",obj.frame)
+elseif( mode == 5 ) then
+	-- 倍率
+	str = string.format("%20.1fx",(height*10^obj.track2)/init_height)
+elseif( mode == 6 ) then
+	-- 足サイズ
+	if( ddigit < 1 ) then
+		str = string.format("%18.3fnm",height*1000000000*10^obj.track2*0.155)
+	elseif( ddigit < 4 ) then
+		str = string.format("%17.3fm",height*1000000*10^obj.track2*0.155)
+	elseif( ddigit < 7 ) then
+		str = string.format("%18.3fmm",height*1000*10^obj.track2*0.155)
+	elseif( digit < 1 ) then
+		str = string.format("%19.2fcm",height*100*10^obj.track2*0.155)
+	elseif( digit < 2 ) then
+		str = string.format("%19.1fcm",height*100*10^obj.track2*0.155)
+	elseif( digit < 6 ) then
+		str = string.format("%20.1fm",height*10^obj.track2*0.155)
+	elseif( digit < 20 ) then
+		str = string.format("%19.1fkm",height/1000*10^obj.track2*0.155)
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2*0.155)
+		col1=0xff7f00
+	end
+elseif( mode == 7 ) then
+	-- 残量
+	if( ddigit < 1 ) then
+		str = string.format("%19.3fnm",(init_height-height)*1000000000*10^obj.track2)
+	elseif( ddigit < 4 ) then
+		str = string.format("%18.3f  m",(init_height-height)*1000000*10^obj.track2)
+	elseif( ddigit < 7 ) then
+		str = string.format("%19.3fmm",(init_height-height)*1000*10^obj.track2)
+	elseif( digit < 1 ) then
+		str = string.format("%19.2fcm",(init_height-height)*100*10^obj.track2)
+	elseif( digit < 2 ) then
+		str = string.format("%19.1fcm",(init_height-height)*100*10^obj.track2)
+	elseif( digit < 6 ) then
+		str = string.format("%20.1fm",(init_height-height)*10^obj.track2)
+	elseif( digit < 20 ) then
+		str = string.format("%19.1fkm",(init_height-height)/1000*10^obj.track2)
+	else
+		str = string.format("%17.1f光年",(init_height-height)/9460730472580800*10^obj.track2)
+		col1=0xff7f00
+	end
+	
+	if (height/init_height < 0.8 ) then
+	 	col1=0x0000ff
+	 	col2=0xffffff
+	 elseif(height/init_height > 1.2) then
+	 	col1=0xff0000
+	 	col2=0x000000
+	 else
+	 	col1=0x00ff00
+	 	col2=0x000000
+	 end
+
+end
+
+obj.setfont(font,256,deco,col1,col2)
+obj.load('text',str)
+
+@身長表示機能(単位なし)
+--track0:線形,-10,10,0
+--track1:指数,-10000,10000,0
+--track2:べき,-20,20,0
+--track3:種別,0,9,1
+--dialog:フォント名,font="Unispace";文字色/col,col1=0xffffff;影・縁色/col,col2=0x000000;装飾タイプ,deco=0;
+init_height = 1.333
+height = init_height
+if(obj.track0 < 0) then
+	height = height*((1+0.9*obj.track0))
+elseif(obj.track0 > 0) then
+	height = height*((1+9*obj.track0))
+end
+height = height * ( 10^(obj.track1/100) )
+
+mode = math.floor(obj.track3)
+digit = math.floor(math.log10(height)+1+obj.track2)
+ddigit = math.floor(math.log10(height)+1+obj.track2+8)
+yd = height*1.09361
+ydigit = math.floor(math.log10(yd)+1+obj.track2)
+yddigit = math.floor(math.log10(yd)+1+obj.track2+8)
+
+weight = 49.9
+if(obj.track0 < 0) then
+	weight = height((1+0.9*obj.track0)^3)
+elseif(obj.track0 > 0) then
+	weight = weight*((1+9*obj.track0)^3)
+end
+weight = weight * ( 10^((obj.track1*3/100)) )
+wdigit = math.floor(math.log10(weight)+1+obj.track2)
+
+if( mode == 0 ) then
+	-- デバッグ
+	--str = string.format("height=%f\ntrack0=%f\n1=%f\n2=%f\ndigit=%d\n",height,obj.track0,obj.track1,obj.track2,digit)
+	str = string.format("obj.time=%f",obj.time)
+elseif( mode == 1 ) then
+	-- メートル
+	if( digit < 6 ) then
+		str = string.format("%20.1f",height*10^obj.track2)
+	elseif( digit < 20 ) then
+		str = string.format("%20.1fK",height/1000*10^obj.track2)
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2)
+		col1=0xff7f00
+	end
+elseif( mode == 2 ) then
+	-- ヤード
+	if( ydigit < 4 ) then
+		-- 1000ydで3000ft
+		str = string.format("%15dft%2din",(yd*10^obj.track2)*3,((yd*10^obj.track2)*3*12)%12)
+	elseif( ydigit < 7 ) then
+		str = string.format("%19.1fyd",(yd*10^obj.track2))
+	elseif( ydigit < 20 ) then
+		str = string.format("%19.1fmi",((yd/1760)*10^obj.track2))
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2)
+		col1=0xff7f00
+	end
+elseif( mode == 3 ) then
+	-- 体重
+	if( wdigit < 5 ) then
+		str = string.format("%19.2fkg",weight)
+	elseif( wdigit < 19 ) then
+		str = string.format("%18.1fton",weight/1000)
+	else
+		str = string.format("  999999999999999+ton")
+		col1=0xff0000
+	end
+elseif( mode == 4 ) then
+	-- フレーム数
+	str = string.format("%-5d",obj.frame)
+elseif( mode == 5 ) then
+	-- 倍率
+	str = string.format("%20.1fx",height/init_height)
+elseif( mode == 6 ) then
+	-- 足サイズ
+	if( ddigit < 1 ) then
+		str = string.format("%18.3fnm",height*1000000000*10^obj.track2*0.155)
+	elseif( ddigit < 4 ) then
+		str = string.format("%17.3fm",height*1000000*10^obj.track2*0.155)
+	elseif( ddigit < 7 ) then
+		str = string.format("%18.3fmm",height*1000*10^obj.track2*0.155)
+	elseif( digit < 1 ) then
+		str = string.format("%19.2fcm",height*100*10^obj.track2*0.155)
+	elseif( digit < 2 ) then
+		str = string.format("%19.1fcm",height*100*10^obj.track2*0.155)
+	elseif( digit < 6 ) then
+		str = string.format("%20.1fm",height*10^obj.track2*0.155)
+	elseif( digit < 20 ) then
+		str = string.format("%19.1fkm",height/1000*10^obj.track2*0.155)
+	else
+		str = string.format("%17.1f光年",height/9460730472580800*10^obj.track2*0.155)
+		col1=0xff7f00
+	end
+end
+
+obj.setfont(font,256,deco,col1,col2)
+obj.load('text',str)
