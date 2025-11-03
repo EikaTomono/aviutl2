@@ -1,0 +1,101 @@
+--身長計算
+height = height * ( 10^(obj.track1/10) ) * ( 10^(obj.track2/10) )
+digit = math.log10(height)+1
+height_yd= height/0.9144
+height_ft= (height/0.9144)*3
+height_in= ((height/0.9144)*3)*12
+height_sun= height/0.0303
+height_shaku= (height/0.0303)/10
+height_ken= ((height/0.0303)/10)/6
+digit_yd = math.log10(height_yd)+1
+digit_ft = math.log10(height_ft)+1
+digit_in = math.log10(height_in)+1
+digit_sun = math.log10(height_sun)+1
+digit_shaku = math.log10(height_shaku)+1
+digit_ken = math.log10(height_ken)+1
+
+
+--体重計算
+weight = weight * ( 10^((obj.track1*3/100)) )
+wdigit = math.floor(math.log10(weight)+1+obj.track2)
+
+if( mode == 0 ) then
+	-- デバッグ
+	-- str = string.format("height=%f\ntrack0=%f\n1=%f\n2=%f\ndigit=%d\n",height,obj.track0,obj.track1,obj.track2,digit)
+	str = string.format("height(metric)=%f,\n height_yd=%f,\n height_ft=%f,\n height_in=%f,\n digit_yd=%f,\n digit_ft=%f,\n digit_in=%f", height, height_yd, height_ft, height_in, digit, digit_yd, digit_ft, digit_in)
+	
+elseif( mode == 1 ) then
+	-- メトリック
+	if(digit < -5) then
+		-- マイナス8桁以上ならnm表示(小数)
+		str = string.format("%19.1fnm",height*1000*1000*1000)
+	elseif(digit < -2) then
+		-- マイナス5桁以上ならum表示(小数)
+		str = string.format("%19.1fum",height*1000*1000)
+	elseif(digit < -1) then
+		-- マイナス2桁以上ならmm表示(小数)
+		str = string.format("%19.1fmm",height*1000)
+	elseif(digit < 1) then
+		-- 0~マイナス1桁ならcm表示(小数)
+		str = string.format("%19.1fcm",height*100)
+	elseif(digit < 2) then
+		-- 1~2桁なら整数のcm表記
+		str = string.format("%19dcm",height*100)
+	elseif(digit < 6) then
+		-- 3~5桁まではm表記
+		str = string.format("%20dm",height)
+	else
+		-- それ以上ならkm表記
+		str = string.format("%19dkm",height/1000)
+	end
+elseif( mode == 2) then
+	-- 倍率
+	if ( height/obj.track4 > 10 ) then
+		str = string.format("%20dx",height/obj.track4)
+	elseif ( height/obj.track4 < 10 and height/obj.track4 > 0.01) then
+		str = string.format("%20d%%",(height/obj.track4)*100)
+	else
+		str = string.format("%20.3f%%",(height/obj.track4)*100)
+	end
+	if(height/obj.track4 < 0.8) then
+		col1=0x0000ff
+		col2=0xffffff
+	elseif(height/obj.track4 > 1.2) then
+		col1=0xff0000
+		col2=0x000000
+	else
+		col1=0x00ff00
+		col2=0xffffff
+	end
+	
+elseif( mode == 4) then
+	-- インペリアル
+	-- 1インチに到達するまでは、小数表示
+	if(digit_in < 2) then
+		str = string.format("%19.3fin",height_in)
+	elseif(digit_ft < 3) then
+		str = string.format("%15dft%2din",height_ft,height_in%12)
+	elseif(digit_ft < 4) then
+		str = string.format("%19dyd",height_yd)
+	elseif(digit_ft < 6.5) then
+		str = string.format("%19.1fmi",height_yd/1760)
+	else
+		str = string.format("%19dmi",height_yd/1760)
+	end
+elseif( mode == 5) then
+	-- 寸
+	if(digit_sun < 2) then
+		str = string.format("%19.3f寸",height_sun)
+	elseif(digit_shaku < 3) then
+		str = string.format("%16d尺%1d寸",height_shaku,height_sun%10)
+	elseif(digit_ken < 3.5) then
+		str = string.format("%13d間%d尺%d寸",height_ken,height_shaku%6,height_sun%10)
+	else
+		str = string.format("%19.1f里",height_ken/60/36)
+	end
+
+end
+
+
+obj.setfont(font,256,deco,col1,col2)
+obj.load('text',str)
